@@ -1,9 +1,8 @@
 import { html, fixture, expect, aTimeout } from '@open-wc/testing';
-import sinon from 'sinon';
 import '../components/PopupModal.ts';
 
 function doubleRAF(): Promise<void> {
-  return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
 async function waitForUpdate(el: HTMLElement) {
@@ -51,7 +50,7 @@ describe('PopupModal', () => {
   describe('opening', () => {
     it('sets open=true when trigger button is clicked', async () => {
       const el = await fixture<HTMLElement>(html`<popup-modal></popup-modal>`);
-      el.querySelector('span button')!.click();
+      (el.querySelector('span button') as HTMLElement)!.click();
       await (el as any).updateComplete;
       expect((el as any).open).to.be.true;
     });
@@ -108,7 +107,7 @@ describe('PopupModal', () => {
       await waitForUpdate(el);
       await doubleRAF();
       const closeBtn = el.querySelector('button[aria-label="Close modal"]')!;
-      closeBtn.click();
+       (closeBtn as HTMLElement).click();
       await (el as any).updateComplete;
       expect((el as any).open).to.be.false;
     });
@@ -203,7 +202,7 @@ describe('PopupModal', () => {
       const triggerSpan = el.querySelector('span.inline-block')!;
       expect(triggerSpan.textContent!.trim()).to.equal('Click me');
 
-      triggerSpan.click();
+       (triggerSpan as HTMLElement).click();
       await (el as any).updateComplete;
       expect((el as any).open).to.be.true;
     });

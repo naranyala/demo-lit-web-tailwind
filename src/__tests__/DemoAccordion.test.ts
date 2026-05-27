@@ -77,7 +77,7 @@ describe('DemoAccordion', () => {
         </demo-accordion>
       `);
       const headers = el.querySelectorAll('.cursor-pointer');
-      headers[1].click();
+      (headers[1] as HTMLElement).click();
       await waitForUpdate(el);
 
       const panels = el.querySelectorAll('[style*="grid-template-rows"]') as NodeListOf<HTMLElement>;
@@ -94,7 +94,7 @@ describe('DemoAccordion', () => {
         </demo-accordion>
       `);
       const headers = el.querySelectorAll('.cursor-pointer');
-      headers[0].click();
+      (headers[0] as HTMLElement).click();
       await waitForUpdate(el);
 
       expect((el as any).index).to.equal(-1);
@@ -114,12 +114,12 @@ describe('DemoAccordion', () => {
       const headers = el.querySelectorAll('.cursor-pointer');
 
       // Open B
-      headers[1].click();
+      (headers[1] as HTMLElement).click();
       await waitForUpdate(el);
       expect((el as any).index).to.equal(1);
 
       // Open C
-      headers[2].click();
+      (headers[2] as HTMLElement).click();
       await waitForUpdate(el);
       expect((el as any).index).to.equal(2);
 
@@ -184,11 +184,11 @@ describe('DemoAccordion', () => {
       `);
       expect((el as any).index).to.equal(0);
 
-      el.querySelector('.cursor-pointer')!.click();
+      (el.querySelector('.cursor-pointer') as HTMLElement)!.click();
       await waitForUpdate(el);
       expect((el as any).index).to.equal(-1);
 
-      el.querySelector('.cursor-pointer')!.click();
+      (el.querySelector('.cursor-pointer') as HTMLElement)!.click();
       await waitForUpdate(el);
       expect((el as any).index).to.equal(0);
     });

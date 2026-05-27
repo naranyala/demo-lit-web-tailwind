@@ -1,9 +1,8 @@
 import { html, fixture, expect, aTimeout } from '@open-wc/testing';
-import sinon from 'sinon';
 import '../components/SlideDrawer.ts';
 
 function doubleRAF(): Promise<void> {
-  return new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 }
 
 async function waitForUpdate(el: HTMLElement) {
@@ -44,7 +43,7 @@ describe('SlideDrawer', () => {
   describe('opening', () => {
     it('sets open=true when trigger button is clicked', async () => {
       const el = await fixture<HTMLElement>(html`<slide-drawer></slide-drawer>`);
-      el.querySelector('span button')!.click();
+      (el.querySelector('span button') as HTMLElement)!.click();
       await (el as any).updateComplete;
       expect((el as any).open).to.be.true;
     });
@@ -94,7 +93,7 @@ describe('SlideDrawer', () => {
       (el as any).open = true;
       await waitForUpdate(el);
       await doubleRAF();
-      el.querySelector('button[aria-label="Close drawer"]')!.click();
+      (el.querySelector('button[aria-label="Close drawer"]') as HTMLElement)!.click();
       await (el as any).updateComplete;
       expect((el as any).open).to.be.false;
     });

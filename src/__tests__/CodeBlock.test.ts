@@ -76,7 +76,7 @@ describe('CodeBlock', () => {
 
   describe('copy functionality', () => {
     function getCopyBtn(el: HTMLElement) {
-      return el.querySelector('button')!;
+      return el.querySelector('button') as HTMLElement;
     }
 
     it('copy button exists with default text "Copy"', async () => {
@@ -172,8 +172,8 @@ describe('CodeBlock', () => {
       await waitForUpdate(container.querySelector('#c1')!);
       await waitForUpdate(container.querySelector('#c2')!);
 
-      const c1btn = container.querySelector('#c1 button')!;
-      const c2btn = container.querySelector('#c2 button')!;
+      const c1btn = container.querySelector('#c1 button') as HTMLElement;
+      const c2btn = container.querySelector('#c2 button') as HTMLElement;
 
       c1btn.click();
       await waitForUpdate(container.querySelector('#c1')!);

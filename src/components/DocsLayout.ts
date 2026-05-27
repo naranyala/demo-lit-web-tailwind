@@ -1,30 +1,9 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-
-// Core Pages
-import introContent from '../docs/intro.md';
-import archContent from '../docs/architecture.md';
-
-// Example Pages
-import accordionEx from '../docs/examples/accordion.md';
-import slideDrawerEx from '../docs/examples/slide-drawer.md';
-import popupModalEx from '../docs/examples/popup-modal.md';
-
-// Import example components to ensure they are registered
-import './DemoAccordion.ts';
-import './CodeBlock.ts';
-import './SlideDrawer.ts';
-import './PopupModal.ts';
-
-interface Page {
-  title: string;
-  content: any;
-}
-
-interface Section {
-  name: string;
-  pages: Record<string, Page>;
-}
+import './DocsSidebar.ts';
+import './DocPage.ts';
+import { DOCS_CONFIG } from '../docs/config/docs-config';
+import type { SectionConfig, PageConfig } from '../docs/config/docs-config';
 
 @customElement('docs-layout')
 export class DocsLayout extends LitElement {
@@ -32,91 +11,78 @@ export class DocsLayout extends LitElement {
     return this;
   }
 
-  private sections: Section[] = [
-    {
-      name: 'Reusable Utilities Demo',
-      pages: {
-        'intro': { title: 'Introduction', content: introContent },
-        'architecture': { title: 'Architecture', content: archContent },
-      }
-    },
-    {
-      name: 'Component Examples',
-      pages: {
-        'accordion': { title: 'Accordion', content: accordionEx },
-        'slide-drawer': { title: 'Slide Drawer', content: slideDrawerEx },
-        'popup-modal': { title: 'Popup Modal', content: popupModalEx },
-      }
-    }
-  ];
+  private sections: SectionConfig[] = DOCS_CONFIG;
 
   @state()
   currentPageId = 'intro';
 
   private get currentPage() {
     for (const section of this.sections) {
-      if (section.pages[this.currentPageId]) {
-        return section.pages[this.currentPageId];
-      }
+      const page = section.pages.find(p => p.id === this.currentPageId);
+      if (page) return page;
     }
-    return this.sections[0].pages['intro'];
+    return this.sections[0].pages[0];
   }
 
-  private _navigate(pageId: string) {
+  private _navigate = (pageId: string) => {
     this.currentPageId = pageId;
   }
 
+  private get sidebarSections() {
+    return this.sections.map(section => ({
+      name: section.name,
+      pages: section.pages.map(page => ({
+        id: page.id,
+        title: page.title
+      }))
+    }));
+  }
+
+  private renderPage(page: PageConfig) {
+    switch (page.component) {
+      case 'doc-page':
+        return html`<doc-page .content=${page.content}></doc-page>`;
+      default:
+        return html`<doc-page .content=${page.content}></doc-page>`;
+    }
+  }
+
   render() {
+    const page = this.currentPage;
     return html`
-      <div class="flex min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans">
-        <!-- Sidebar -->
-        <aside class="w-72 border-r border-slate-200 dark:border-slate-800 p-6 flex flex-col gap-8 sticky top-0 h-screen bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
-          <div class="flex items-center gap-3 px-2">
+      <div class="h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans transition-colors overflow-hidden flex flex-col">
+        <!-- Top Navbar -->
+        <nav class="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 shrink-0 bg-white dark:bg-slate-900 z-10">
+          <div class="flex items-center gap-3 cursor-pointer" @click=${() => this._navigate('intro')}>
             <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">L</div>
             <div class="text-xl font-bold tracking-tight">
               Lit<span class="text-indigo-600">Web</span>
             </div>
           </div>
-          
-          <nav class="flex flex-col gap-6">
-            ${this.sections.map(section => html`
-              <div>
-                <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">
-                  ${section.name}
-                </div>
-                <div class="flex flex-col gap-1">
-                  ${Object.entries(section.pages).map(([id, page]) => html`
-                    <button 
-                      @click=${() => this._navigate(id)}
-                      class="text-left px-3 py-2 rounded-md transition-all ${this.currentPageId === id ? 'bg-indigo-600 text-white shadow-sm font-medium' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}"
-                    >
-                      ${page.title}
-                    </button>
-                  `)}
-                </div>
-              </div>
-            `)}
-          </nav>
-
-          <div class="mt-auto p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800/50">
-            <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium mb-2">Powered by</p>
-            <p class="text-sm font-bold">Lit + Tailwind v4</p>
+          <div class="flex items-center gap-4">
+            <a href="https://github.com" target="_blank" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">GitHub</a>
+            <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700"></div>
           </div>
-        </aside>
+        </nav>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto p-6 md:p-12 lg:p-24">
-          <article class="prose dark:prose-invert max-w-3xl mx-auto">
-            ${this.currentPage.content}
-          </article>
-        </main>
+        <div class="flex-1 flex overflow-hidden">
+          <docs-sidebar 
+            .sections=${this.sidebarSections} 
+            .currentPageId=${this.currentPageId}
+            .onNavigate=${this._navigate}
+            class="w-64"
+          >
+          </docs-sidebar>
+
+          <!-- Main Content -->
+          <main class="flex-1 overflow-y-auto p-6 md:p-12 lg:p-16">
+            <article class="prose dark:prose-invert max-w-3xl mx-auto">
+              ${this.renderPage(page)}
+            </article>
+          </main>
+        </div>
       </div>
     `;
   }
-
-  static styles = css`
-    :host {
-      display: block;
-    }
-  `;
 }
+

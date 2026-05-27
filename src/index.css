@@ -1,2 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* Hide custom elements before they're defined (prevents FOUC) */
+demo-accordion:not(:defined),
+popup-modal:not(:defined),
+slide-drawer:not(:defined) {
+  display: none;
+}

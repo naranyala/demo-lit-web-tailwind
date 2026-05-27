@@ -8,7 +8,42 @@ This project showcases the integration of:
 
 ## Quick Start
 To get started, run:
-\`\`\`bash
+```bash
 bun install
 bun run dev
-\`\`\`
+```
+
+## Your First Component
+
+A basic Lit component with Tailwind:
+
+```ts
+import { LitElement, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
+@customElement('hello-card')
+export class HelloCard extends LitElement {
+  @property({ type: String })
+  name = 'World';
+
+  createRenderRoot() { return this; }
+
+  render() {
+    return html`
+      <div class="p-6 bg-white rounded-xl shadow-md border border-slate-200">
+        <h2 class="text-lg font-semibold text-slate-800">Hello, ${this.name}!</h2>
+        <p class="text-sm text-slate-600 mt-1">This component uses Lit + Tailwind.</p>
+      </div>
+    `;
+  }
+}
+```
+
+## Using the Component
+
+Register and use it in any template:
+
+```html
+<hello-card name="Lit"></hello-card>
+<hello-card name="Tailwind"></hello-card>
+```

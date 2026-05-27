@@ -6,13 +6,15 @@ import introContent from '../docs/intro.md';
 import archContent from '../docs/architecture.md';
 
 // Example Pages
-import buttonEx from '../docs/examples/button.md';
-import cardEx from '../docs/examples/card.md';
+import accordionEx from '../docs/examples/accordion.md';
+import slideDrawerEx from '../docs/examples/slide-drawer.md';
+import popupModalEx from '../docs/examples/popup-modal.md';
 
 // Import example components to ensure they are registered
-import './ExampleButton.ts';
-import './ExampleCard.ts';
+import './DemoAccordion.ts';
 import './CodeBlock.ts';
+import './SlideDrawer.ts';
+import './PopupModal.ts';
 
 interface Page {
   title: string;
@@ -32,7 +34,7 @@ export class DocsLayout extends LitElement {
 
   private sections: Section[] = [
     {
-      name: 'Guide',
+      name: 'Reusable Utilities Demo',
       pages: {
         'intro': { title: 'Introduction', content: introContent },
         'architecture': { title: 'Architecture', content: archContent },
@@ -41,8 +43,9 @@ export class DocsLayout extends LitElement {
     {
       name: 'Component Examples',
       pages: {
-        'button': { title: 'Button', content: buttonEx },
-        'card': { title: 'Card', content: cardEx },
+        'accordion': { title: 'Accordion', content: accordionEx },
+        'slide-drawer': { title: 'Slide Drawer', content: slideDrawerEx },
+        'popup-modal': { title: 'Popup Modal', content: popupModalEx },
       }
     }
   ];

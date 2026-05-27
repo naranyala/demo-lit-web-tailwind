@@ -1,87 +1,68 @@
-import { LitElement, html, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { LitElement, html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import { customElement, property, state } from 'lit/decorators.js';
 
 @customElement('code-block')
 export class CodeBlock extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      margin: 1.5rem 0;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      border: 1px solid #e2e8f0;
-      background: #1e293b;
-    }
+  @property({ type: String })
+  lang = '';
 
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.5rem 1rem;
-      background: #0f172a;
-      border-bottom: 1px solid #334155;
-      color: #94a3b8;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.75rem;
-    }
+  @state()
+  private _copied = false;
 
-    .copy-btn {
-      padding: 0.25rem 0.5rem;
-      background: #334155;
-      color: #f1f5f9;
-      border: none;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: 0.7rem;
-      transition: all 0.2s;
-    }
+  private _codeHtml = '';
+  private _timer?: ReturnType<typeof setTimeout>;
 
-    .copy-btn:hover {
-      background: #475569;
-    }
+  createRenderRoot() { return this; }
 
-    .copy-btn.copied {
-      background: #10b981;
-      color: white;
+  connectedCallback() {
+    if (!this._codeHtml) {
+      this._codeHtml = this.innerHTML;
+      this.innerHTML = '';
     }
+    super.connectedCallback();
+  }
 
-    .content {
-      padding: 0;
-      overflow-x: auto;
-    }
-
-    /* Ensure shiki styles work inside */
-    pre {
-      margin: 0 !important;
-      padding: 1rem !important;
-      background: transparent !important;
-    }
-  `;
+  private _copy() {
+    const div = document.createElement('div');
+    div.innerHTML = this._codeHtml;
+    const text = div.textContent || '';
+    navigator.clipboard.writeText(text).catch(() => {});
+    this._copied = true;
+    clearTimeout(this._timer);
+    this._timer = setTimeout(() => {
+      this._copied = false;
+    }, 2000);
+  }
 
   render() {
     return html`
-      <div class="header">
-        <span class="lang">${this.getAttribute('lang') || 'code'}</span>
-        <button class="copy-btn" @click=${this._copy}>Copy</button>
-      </div>
-      <div class="content">
-        <slot></slot>
+      <div class="my-6 rounded-xl border border-slate-700 bg-[#0d1117] shadow-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2.5 bg-[#161b22] border-b border-slate-700">
+          <div class="flex items-center gap-3">
+            <div class="flex gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-[#ff5f56]"></span>
+              <span class="w-3 h-3 rounded-full bg-[#ffbd2e]"></span>
+              <span class="w-3 h-3 rounded-full bg-[#27c93f]"></span>
+            </div>
+            ${this.lang ? html`<span class="text-xs text-slate-400 font-mono">${this.lang}</span>` : ''}
+          </div>
+          <button
+            class="px-3 py-1 rounded text-xs font-medium transition-colors ${this._copied ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}"
+            @click=${this._copy}
+          >
+            ${this._copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <div class="overflow-x-auto p-4 [&_pre]:!m-0 [&_pre]:!bg-transparent [&_pre]:!p-0 [&_code]:!bg-transparent [&_code]:!p-0">
+          ${this._codeHtml ? unsafeHTML(this._codeHtml) : ''}
+        </div>
       </div>
     `;
   }
 
-  private async _copy(e: Event) {
-    const btn = e.target as HTMLButtonElement;
-    const code = this.querySelector('code')?.textContent || '';
-    
-    await navigator.clipboard.writeText(code);
-    
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    
-    setTimeout(() => {
-      btn.textContent = 'Copy';
-      btn.classList.remove('copied');
-    }, 2000);
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    clearTimeout(this._timer);
   }
 }
